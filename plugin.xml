@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8' ?>
+<plugin id="cordova-plugin-powapos" version="0.0.1" xmlns="http://apache.org/cordova/ns/plugins/1.0">
+    <name>PowaPOSPlugin</name>
+    <description>Cordova plugin to connect to PowaPOS device</description>
+
+    <engines>
+        <engine name="cordova" version=">=3.4.0"/>
+    </engines>
+
+    <js-module src="www/PowaPOSPlugin.js" name="PowaPOS">
+        <clobbers target="window.plugins.powaPOS" />
+    </js-module>
+
+    <platform name="ios">
+        <hook type="after_plugin_install" src="hooks/add_swift_support.js" />
+        <config-file parent="/*" target="config.xml">
+            <feature name="PowaPOSPlugin">
+                <param name="ios-package" value="PowaPOSPlugin" />
+            </feature>
+        </config-file>
+        <header-file src="src/ios/PowaPOS-Bridging-Header.h" />
+        <source-file src="src/ios/PowaPOSPlugin.swift" />
+    </platform>
+</plugin>
