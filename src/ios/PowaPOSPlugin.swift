@@ -17,21 +17,19 @@ import Foundation
     var scannerConnected = false
     var tseriesConnected = false
     
-    override init() {
-        super.init()
-    }
-    
     override func pluginInitialize() {
+        debugPrint("pluginInitialize")
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "accessoryDidConnect", name: EAAccessoryDidConnectNotification, object: nil)
         EAAccessoryManager.sharedAccessoryManager().registerForLocalNotifications()
         self.powaPOS = PowaPOS()
         self.initDevices()
     }
-    
+
     func initDevices() {
+        debugPrint("initDevices")
         if (self.tseries == nil) {
             let connectedTSeries = PowaTSeries.connectedDevices()
-            
+
             if (connectedTSeries.count > 0) {
                 self.tseries = connectedTSeries[0] as! PowaTSeries
                 self.tseries.addObserver(self)
@@ -41,7 +39,7 @@ import Foundation
 
         if (self.scanner == nil) {
             let connectedScanners = PowaS10Scanner.connectedDevices()
-            
+
             if (connectedScanners.count > 0) {
                 self.scanner = connectedScanners[0] as! PowaS10Scanner
                 self.scanner.addObserver(self)
@@ -49,21 +47,22 @@ import Foundation
             }
         }
     }
-    
+
     func accessoryDidConnect(notification: NSNotification) {
         self.initDevices()
     }
-    
+
     override func dispose() {
         self.tseries.removeObserver(self)
         self.scanner.removeObserver(self)
     }
-    
+
     //Commands
     func connect(command: CDVInvokedUrlCommand) {
         mainCallbackId = command.callbackId
+        self.commandDelegate?.sendPluginResult(CDVPluginResult(status: CDVCommandStatus_OK, messageAsBool: true), callbackId: command.callbackId)
     }
-    
+
     func scannerBeep(command: CDVInvokedUrlCommand) {
         if (self.scanner != nil) {
             var beepType = UInt(PowaS10ScannerBeepLong1BeepHigh)
@@ -74,9 +73,12 @@ import Foundation
                 }
             }
             self.scanner.beep(beepType)
+            self.commandDelegate?.sendPluginResult(CDVPluginResult(status: CDVCommandStatus_OK, messageAsBool: true), callbackId: command.callbackId)
+        } else {
+            self.commandDelegate?.sendPluginResult(CDVPluginResult(status: CDVCommandStatus_OK, messageAsBool: false), callbackId: command.callbackId)
         }
     }
-    
+
     func scannerAutoScanOnOff(command: CDVInvokedUrlCommand) {
         if (self.scanner != nil) {
             var autoScan = false;
@@ -85,10 +87,10 @@ import Foundation
             }
             scanner.setScannerAutoScan(autoScan);
         } else {
-            
+
         }
     }
-    
+
     func openCashDrawer(command: CDVInvokedUrlCommand) {
         if (self.tseries != nil) {
             self.tseries.openCashDrawer()
@@ -97,11 +99,11 @@ import Foundation
             self.commandDelegate?.sendPluginResult(CDVPluginResult(status: CDVCommandStatus_OK, messageAsBool: false), callbackId: command.callbackId)
         }
     }
-    
+
     func printReceipt(command: CDVInvokedUrlCommand) {
         if (self.tseries != nil && command.arguments.count > 0) {
             let receiptContent = command.arguments[0] as! String
-            
+
             self.tseries.startReceipt()
             self.tseries.setFormat(.MagnificationNone)
             self.tseries.setFormat(.None)
@@ -112,46 +114,46 @@ import Foundation
             self.commandDelegate?.sendPluginResult(CDVPluginResult(status: CDVCommandStatus_OK, messageAsBool: false), callbackId: command.callbackId)
         }
     }
-    
+
     func getDeviceInfo(command: CDVInvokedUrlCommand) {
-        
+
     }
-    
+
     //Observer functions
     func tseries(tseries: PowaTSeries!, deviceConnectedAtPort port: UInt) {
-        self.sendData("PowaTSeries_deviceConnectedAtPort", data: port)
+        self.sendData("PowaTSeries_deviceConnectedAtPort", data: String(port))
     }
     func tseries(tseries: PowaTSeries!, deviceDisconnectedAtPort port: UInt) {
-        self.sendData("PowaTSeries_deviceDisconnectedAtPort", data: port)
+        self.sendData("PowaTSeries_deviceDisconnectedAtPort", data: String(port))
     }
     func tseries(tseries: PowaTSeries!, connectionStateChanged connectionState: UInt) {
-        self.sendData("PowaTSeries_connectionStateChanged", data: connectionState)
+        self.sendData("PowaTSeries_connectionStateChanged", data: String(connectionState))
     }
     func tseries(tseries: PowaTSeries!, bootcodeUpdateProgress progress: CGFloat) {
-        self.sendData("PowaTSeries_bootcodeUpdateProgress", data: progress)
+        self.sendData("PowaTSeries_bootcodeUpdateProgress", data: String(progress))
     }
     func tseries(tseries: PowaTSeries!, ftdiDeviceReceivedData data: NSData!, port: UInt) {
-        let dataDictionary: [NSObject:String] = [data:"data",port:"port"]
-        self.sendData("PowaTSeries_ftdiDeviceReceivedData", data: dataDictionary)
+        let dataString = String.init(format: "{ dataReceived: '%@', port: '%@' }", data.base64EncodedString(), port)
+        self.sendData("PowaTSeries_ftdiDeviceReceivedData", data: dataString)
     }
     func tseries(tseries: PowaTSeries!, hidDeviceConnectedAtPort port: UInt, deviceType type: PowaUSBHIDDeviceType) {
-        let dataDictionary: [NSObject:String] = [type == .Keyboard ? 0 : 1:"deviceType",port:"port"]
-        self.sendData("PowaTSeries_hidDeviceConnectedAtPort", data: dataDictionary)
+        let dataString = String.init(format: "{ port: '%@', deviceType: '%@' }", port, type == .Keyboard ? "keyboard" : "mouse")
+        self.sendData("PowaTSeries_hidDeviceConnectedAtPort", data: dataString)
     }
     func tseries(tseries: PowaTSeries!, hidDeviceDisconnectedAtPort port: UInt, deviceType type: PowaUSBHIDDeviceType) {
-        let dataDictionary: [NSObject:String] = [type == .Keyboard ? 0 : 1:"deviceType",port:"port"]
-        self.sendData("PowaTSeries_hidDeviceDisconnectedAtPort", data: dataDictionary)
+        let dataString = String.init(format: "{ port: '%@', deviceType: '%@' }", port, type == .Keyboard ? "keyboard" : "mouse")
+        self.sendData("PowaTSeries_hidDeviceDisconnectedAtPort", data: dataString)
     }
-    func tseries(tseries: PowaTSeries!, hidDeviceReceivedData data: NSData!, port: UInt, deviceType type: PowaUSBHIDDeviceType) {
-        let dataDictionary: [NSObject:String] = [data:"data", type == .Keyboard ? 0 : 1:"deviceType",port:"port"]
-        self.sendData("PowaTSeries_hidDeviceReceivedData", data: dataDictionary)
+    func tseries(tseries: PowaTSeries!, format data: NSData!, port: UInt, deviceType type: PowaUSBHIDDeviceType) {
+        let dataString = String.init(format: "{ dataReceived: '%@', port: '%@', deviceType: '%@' }", data.base64EncodedString(), port, type == .Keyboard ? "keyboard" : "mouse")
+        self.sendData("PowaTSeries_hidDeviceReceivedData", data: dataString)
     }
     func tseries(tseries: PowaTSeries!, receivedData data: NSData!, port: UInt) {
-        let dataDictionary: [NSObject:String] = [data:"data",port:"port"]
-        self.sendData("PowaTSeries_receivedData", data: dataDictionary)
+        let dataString = String.init(format: "{ dataReceived: '%@', port: '%@' }", data.base64EncodedString(), port)
+        self.sendData("PowaTSeries_receivedData", data: dataString)
     }
     func tseries(tseries: PowaTSeries!, updateProgress progress: CGFloat) {
-        self.sendData("PowaTSeries_updateProgress", data: progress)
+        self.sendData("PowaTSeries_updateProgress", data:String(progress))
     }
     func tseriesCashDrawerAttached(tseries: PowaTSeries!) {
         self.sendData("PowaTSeries_tseriesCashDrawerAttached")
@@ -175,7 +177,7 @@ import Foundation
         self.sendData("PowaTSeries_tseriesDidStartUpdatingBootcode")
     }
     func tseriesFailedUpdatingBootcode(tseries: PowaTSeries!, error: NSError!) {
-        self.sendData("PowaTSeries_tseriesFailedUpdatingBootcode")
+        self.sendData("PowaTSeries_tseriesFailedUpdatingBootcode", data: error.description)
     }
     func tseriesOutOfPaper(tseries: PowaTSeries!) {
         self.sendData("PowaTSeries_tseriesOutOfPaper")
@@ -210,32 +212,37 @@ import Foundation
         }
         self.sendData("PowaTSeries_tseriesPrinterResult", data: resultText)
     }
-    
+
     func scanner(scanner: PowaScanner!, connectionStateChanged connectionState: UInt) {
-        sendData("PowaS10Scanner_connectionStateChanged", data: connectionState)
+        sendData("PowaS10Scanner_connectionStateChanged", data: String(connectionState))
     }
-    
+
     func scanner(scanner: PowaScanner!, scannedBarcode barcode: String!) {
         sendData("PowaS10Scanner_scannedBarcode", data: barcode)
     }
-    
+
     func scanner(scanner: PowaScanner!, scannedBarcodeData data: NSData!) {
-        sendData("PowaS10Scanner_scannedBarcodeData", data: data)
+        sendData("PowaS10Scanner_scannedBarcodeData", data: data.base64EncodedString())
     }
-    
+
     func scannerDidFinishInitializing(scanner: PowaScanner!) {
         sendData("PowaScanner_scannerDidFinishInitializing")
     }
-    
+
     func rotationSensor(rotationSensor: PowaRotationSensor!, rotated: Bool) {
-        sendData("rotationSensor", data: rotated)
+        sendData("rotationSensor", data: String(rotated))
     }
-    
-    func sendData(type: String, data: NSObject! = nil) {
-        if (mainCallbackId != nil) {
-            let resultData: [NSObject:String] = [ type : "type", data == nil ? "" : data : "data"]
-            let result = CDVPluginResult(status: CDVCommandStatus_OK, messageAsDictionary: resultData)
-            self.commandDelegate?.sendPluginResult(result, callbackId: mainCallbackId)
+
+    func sendData(type: String, data: String! = nil) {
+        var dataString = "null"
+        if (data != nil) {
+            if (data.containsString("{")) {
+                dataString = data
+            } else {
+                dataString = "'" + data + "'"
+            }
         }
+        let js = String(format: "setTimeout(function () { window.plugins.powaPOS.handleDataReceived({ dataType: '%@', data: %@}); },0)", type, dataString)
+        commandDelegate?.evalJs(js)
     }
 }
