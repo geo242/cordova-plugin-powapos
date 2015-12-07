@@ -20,6 +20,7 @@ import Foundation
     override func pluginInitialize() {
         debugPrint("pluginInitialize")
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "accessoryDidConnect", name: EAAccessoryDidConnectNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "accessoryDidDisconnect", name: EAAccessoryDidDisconnectNotification, object: nil)
         EAAccessoryManager.sharedAccessoryManager().registerForLocalNotifications()
         self.powaPOS = PowaPOS()
         self.initDevices()
@@ -31,9 +32,14 @@ import Foundation
             let connectedTSeries = PowaTSeries.connectedDevices()
 
             if (connectedTSeries.count > 0) {
+                sendData("PowaTSeries_Info", data: "Found PowaTSeries")
                 self.tseries = connectedTSeries[0] as! PowaTSeries
                 self.tseries.addObserver(self)
                 self.powaPOS.addPeripheral(self.tseries)
+                tseriesConnected = true
+            } else {
+                sendData("PowaTSeries_Info", data: "Did not find PowaTSeries")
+                tseriesConnected = false
             }
         }
 
@@ -41,15 +47,25 @@ import Foundation
             let connectedScanners = PowaS10Scanner.connectedDevices()
 
             if (connectedScanners.count > 0) {
+                sendData("PowaTSeries_Info", data: "Found PowaS10Scanner")
                 self.scanner = connectedScanners[0] as! PowaS10Scanner
                 self.scanner.addObserver(self)
                 self.powaPOS.addPeripheral(self.scanner)
+                scannerConnected = true
+            } else {
+                sendData("PowaTSeries_Info", data: "Did not find PowaS10Scanner")
+                scannerConnected = false
             }
         }
     }
 
     func accessoryDidConnect(notification: NSNotification) {
+        sendData("PowaTSeries_Info", data: notification.description)
         self.initDevices()
+    }
+
+    func accessoryDidDisconnect(notification: NSNotification) {
+        sendData("PowaTSeries_Info", data: notification.description)
     }
 
     override func dispose() {
@@ -144,6 +160,10 @@ import Foundation
         let dataString = String.init(format: "{ port: '%@', deviceType: '%@' }", port, type == .Keyboard ? "keyboard" : "mouse")
         self.sendData("PowaTSeries_hidDeviceDisconnectedAtPort", data: dataString)
     }
+    func tseries(tseries: PowaTSeries!, hidDeviceReceivedData data: NSData!, port: UInt, deviceType type: PowaUSBHIDDeviceType) {
+        let dataString = String.init(format: "{ dataReceived: '%@', port: '%@', deviceType: '%@' }", data.base64EncodedString(), port, type == .Keyboard ? "keyboard" : "mouse")
+        self.sendData("PowaTSeries_hidDeviceConnectedAtPort", data: dataString)
+    }
     func tseries(tseries: PowaTSeries!, format data: NSData!, port: UInt, deviceType type: PowaUSBHIDDeviceType) {
         let dataString = String.init(format: "{ dataReceived: '%@', port: '%@', deviceType: '%@' }", data.base64EncodedString(), port, type == .Keyboard ? "keyboard" : "mouse")
         self.sendData("PowaTSeries_hidDeviceReceivedData", data: dataString)
@@ -231,6 +251,18 @@ import Foundation
 
     func rotationSensor(rotationSensor: PowaRotationSensor!, rotated: Bool) {
         sendData("rotationSensor", data: String(rotated))
+    }
+
+    func peripheral(peripheral: PowaPeripheral, connectionStateChanged connectionState: PowaPeripheralConnectionState) {
+        var state = ""
+        if (Int(connectionState) == PowaPeripheralConnectionStateConnected) {
+            state = "Connected"
+        } else if (Int(connectionState) == PowaPeripheralConnectionStateConnecting) {
+            state = "Connecting"
+        } else {
+            state = "Disconnected"
+        }
+        sendData("PowaPeripheral_connectionStateChanged", data: state)
     }
 
     func sendData(type: String, data: String! = nil) {
