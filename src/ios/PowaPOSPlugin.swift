@@ -19,8 +19,8 @@ import Foundation
     
     override func pluginInitialize() {
         debugPrint("pluginInitialize")
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "accessoryDidConnect", name: EAAccessoryDidConnectNotification, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "accessoryDidDisconnect", name: EAAccessoryDidDisconnectNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "accessoryDidConnect:", name: EAAccessoryDidConnectNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "accessoryDidDisconnect:", name: EAAccessoryDidDisconnectNotification, object: nil)
         EAAccessoryManager.sharedAccessoryManager().registerForLocalNotifications()
         self.powaPOS = PowaPOS()
         self.initDevices()
@@ -117,8 +117,9 @@ import Foundation
     }
 
     func printReceipt(command: CDVInvokedUrlCommand) {
+        debugPrint(command.arguments)
         if (self.tseries != nil && command.arguments.count > 0) {
-            let receiptContent = command.arguments[0] as! String
+            let receiptContent = command.argumentAtIndex(0) as! String
 
             self.tseries.startReceipt()
             self.tseries.setFormat(.MagnificationNone)
