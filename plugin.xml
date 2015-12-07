@@ -15,7 +15,7 @@
         <hook type="after_plugin_install" src="hooks/add_swift_support.js" />
         <config-file parent="/*" target="config.xml">
             <feature name="PowaPOSPlugin">
-                <param name="ios-package" value="PowaPOSPlugin" />
+                <param name="ios-package" value="PowaPOSPlugin" onload="true"/>
             </feature>
         </config-file>
         <header-file src="src/ios/PowaPOS-Bridging-Header.h" />
