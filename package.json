@@ -1,0 +1,31 @@
+{
+  "name": "cordova-plugin-powapos",
+  "version": "0.0.1",
+  "description": "Cordova plugin to connect to PowaPOS device",
+  "cordova": {
+    "id": "cordova-plugin-powapos",
+    "platforms": [
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/geo242/cordova-plugin-powapos.git"
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-ios"
+  ],
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=3.4.0"
+    }
+  ],
+  "author": "Geoff Tripoli",
+  "license": "Apache",
+  "bugs": {
+    "url": "https://github.com/geo242/cordova-plugin-powapos/issues"
+  },
+  "homepage": "https://github.com/geo242/cordova-plugin-powapos#readme"
+}
