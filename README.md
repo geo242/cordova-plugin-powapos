@@ -37,11 +37,11 @@ Cordova initializes the plugin as `window.plugins.powaPOS` object.
 
 ## Methods
 
-- `window.geofence.connect(onSuccess, onError)`
-- `window.geofence.scannerBeep(beepType, onSuccess, onError)`
-- `window.geofence.scannerAutoScanOnOff(autoScan, onSuccess, onError)`
-- `window.geofence.openCashDrawer(onSuccess, onError)`
-- `window.geofence.printReceipt(receiptContent, onSuccess, onError)`
+- `window.plugins.powaPOS.connect(onSuccess, onError)`
+- `window.plugins.powaPOS.scannerBeep(beepType, onSuccess, onError)`
+- `window.plugins.powaPOS.scannerAutoScanOnOff(autoScan, onSuccess, onError)`
+- `window.plugins.powaPOS.openCashDrawer(onSuccess, onError)`
+- `window.plugins.powaPOS.printReceipt(receiptContent, onSuccess, onError)`
 
 All methods returning promises, but you can also use standard callback functions.
 
