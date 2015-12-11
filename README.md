@@ -12,11 +12,15 @@ Coming soon
 
 ## Installation
 
-From master
+From master (latest)
 ```
 cordova plugin add https://github.com/geo242/cordova-plugin-powapos
 ```
 
+Stable (npm)
+```
+cordova plugin add cordova-plugin-powapos
+```
 
 ## Removing the Plugin from project
 
