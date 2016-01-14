@@ -150,7 +150,7 @@ import Foundation
         self.sendData("PowaTSeries_bootcodeUpdateProgress", data: String(progress))
     }
     func tseries(tseries: PowaTSeries!, ftdiDeviceReceivedData data: NSData!, port: UInt) {
-        let dataString = String.init(format: "{ dataReceived: '%@', port: '%@' }", data.base64EncodedString(), port)
+        let dataString = String.init(format: "{ dataReceived: '%@', port: '%@' }", data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.Encoding64CharacterLineLength), port)
         self.sendData("PowaTSeries_ftdiDeviceReceivedData", data: dataString)
     }
     func tseries(tseries: PowaTSeries!, hidDeviceConnectedAtPort port: UInt, deviceType type: PowaUSBHIDDeviceType) {
@@ -162,15 +162,15 @@ import Foundation
         self.sendData("PowaTSeries_hidDeviceDisconnectedAtPort", data: dataString)
     }
     func tseries(tseries: PowaTSeries!, hidDeviceReceivedData data: NSData!, port: UInt, deviceType type: PowaUSBHIDDeviceType) {
-        let dataString = String.init(format: "{ dataReceived: '%@', port: '%@', deviceType: '%@' }", data.base64EncodedString(), port, type == .Keyboard ? "keyboard" : "mouse")
+        let dataString = String.init(format: "{ dataReceived: '%@', port: '%@', deviceType: '%@' }", data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.Encoding64CharacterLineLength), port, type == .Keyboard ? "keyboard" : "mouse")
         self.sendData("PowaTSeries_hidDeviceConnectedAtPort", data: dataString)
     }
     func tseries(tseries: PowaTSeries!, format data: NSData!, port: UInt, deviceType type: PowaUSBHIDDeviceType) {
-        let dataString = String.init(format: "{ dataReceived: '%@', port: '%@', deviceType: '%@' }", data.base64EncodedString(), port, type == .Keyboard ? "keyboard" : "mouse")
+        let dataString = String.init(format: "{ dataReceived: '%@', port: '%@', deviceType: '%@' }", data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.Encoding64CharacterLineLength), port, type == .Keyboard ? "keyboard" : "mouse")
         self.sendData("PowaTSeries_hidDeviceReceivedData", data: dataString)
     }
     func tseries(tseries: PowaTSeries!, receivedData data: NSData!, port: UInt) {
-        let dataString = String.init(format: "{ dataReceived: '%@', port: '%@' }", data.base64EncodedString(), port)
+        let dataString = String.init(format: "{ dataReceived: '%@', port: '%@' }", data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.Encoding64CharacterLineLength), port)
         self.sendData("PowaTSeries_receivedData", data: dataString)
     }
     func tseries(tseries: PowaTSeries!, updateProgress progress: CGFloat) {
@@ -243,7 +243,7 @@ import Foundation
     }
 
     func scanner(scanner: PowaScanner!, scannedBarcodeData data: NSData!) {
-        sendData("PowaS10Scanner_scannedBarcodeData", data: data.base64EncodedString())
+        sendData("PowaS10Scanner_scannedBarcodeData", data: data.base64EncodedStringWithOptions(NSDataBase64EncodingOptions.Encoding64CharacterLineLength))
     }
 
     func scannerDidFinishInitializing(scanner: PowaScanner!) {
