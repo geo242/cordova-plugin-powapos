@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-powapos",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Cordova plugin to connect to PowaPOS device",
   "cordova": {
     "id": "cordova-plugin-powapos",

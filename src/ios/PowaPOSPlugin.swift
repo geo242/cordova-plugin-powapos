@@ -121,11 +121,82 @@ import Foundation
         if (self.tseries != nil && command.arguments.count > 0) {
             let receiptContent = command.argumentAtIndex(0) as! String
 
-            self.tseries.startReceipt()
-            self.tseries.setFormat(.MagnificationNone)
-            self.tseries.setFormat(.None)
-            self.tseries.printText(receiptContent)
-            self.tseries.printReceipt()
+            let bold = "<bold>"
+            let center = "<center>"
+            let left = "<left>"
+            let right = "<right>"
+            let normal = "<normal>"
+            let small = "<small>"
+            let padCenter = "<padcenter>"
+            let normalFont = UIFont.systemFontOfSize(26)
+            let smallFont = UIFont.init(name: "Courier", size: 22)
+            let boldFont = UIFont.boldSystemFontOfSize(26)
+            let monoSpaceFont = UIFont.init(name: "Courier", size: 26)
+            let monoSpaceBoldFont = UIFont.init(name: "Courier-Bold", size: 26)
+            let footer = "\n\n\n"
+            let totalCharacters = 36
+
+            let receiptBuilder = PowaReceiptBuilder.init()
+            var currentAlign = NSTextAlignment.Left
+            var currentFont = normalFont
+
+            let receiptContentLines = receiptContent.characters.split("\n").map(String.init)
+            for line in receiptContentLines {
+                var editedLine = line
+                var isBold = false
+
+                if (editedLine.containsString(bold)) {
+                    editedLine = editedLine.stringByReplacingOccurrencesOfString(bold, withString: "")
+                    currentFont = boldFont
+                    isBold = true
+                }
+
+                if (editedLine.containsString(small)) {
+                    editedLine = editedLine.stringByReplacingOccurrencesOfString(small, withString: "")
+                    currentFont = smallFont!
+                }
+
+                if (editedLine.containsString(normal)) {
+                    editedLine = editedLine.stringByReplacingOccurrencesOfString(normal, withString: "")
+                    currentFont = normalFont
+                }
+
+                if (editedLine.containsString(center)) {
+                    editedLine = editedLine.stringByReplacingOccurrencesOfString(center, withString: "")
+                    currentAlign = NSTextAlignment.Center
+                }
+
+                if (editedLine.containsString(left)) {
+                    editedLine = editedLine.stringByReplacingOccurrencesOfString(left, withString: "")
+                    currentAlign = NSTextAlignment.Left
+                }
+
+                if (editedLine.containsString(right)) {
+                    editedLine = editedLine.stringByReplacingOccurrencesOfString(right, withString: "")
+                    currentAlign = NSTextAlignment.Right
+                }
+
+                if (editedLine.containsString(padCenter)) {
+                    editedLine = editedLine.stringByReplacingOccurrencesOfString(padCenter, withString: "|")
+                    let items = editedLine.characters.split("|").map(String.init)
+                    let item1 = items.first
+                    let item2 = items.last
+                    let item1Length = item1?.characters.count
+                    let item2Length = item2?.characters.count
+
+                    if (item1Length! + item2Length! < totalCharacters) {
+                        let paddingLength = totalCharacters - (item1Length! + item2Length!)
+                        editedLine = (item1?.stringByPaddingToLength(((item1?.characters.count)! + paddingLength), withString: " ", startingAtIndex: 0))!
+                        editedLine = editedLine.stringByAppendingString(item2!)
+                    }
+                    currentFont = (isBold ? monoSpaceBoldFont : monoSpaceFont)!
+                }
+                receiptBuilder.addText(editedLine, alignment: currentAlign, font: currentFont)
+            }
+
+            receiptBuilder.addText(footer, alignment: .Left, font: normalFont)
+
+            self.tseries.printImage(receiptBuilder.receiptImage())
             self.commandDelegate?.sendPluginResult(CDVPluginResult(status: CDVCommandStatus_OK, messageAsBool: true), callbackId: command.callbackId)
         } else {
             self.commandDelegate?.sendPluginResult(CDVPluginResult(status: CDVCommandStatus_OK, messageAsBool: false), callbackId: command.callbackId)
